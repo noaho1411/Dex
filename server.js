@@ -10,8 +10,8 @@ app.use(fileUpload({ createParentPath: true }));
 app.use(session({
 	secret: "H*44%^^K7@6!yS8$",
 	resave: false,
-	saveUninitialized: true,
-	cookie: { secure: true }
+	saveUninitialized: false,
+	cookie: { secure: false }
 }));
 app.set("view engine","ejs")
 
@@ -21,7 +21,7 @@ app.set("view engine","ejs")
 
 app.get("/", (req, res) => {
 
-	res.render("home", {title:"Dex!"});
+	res.render("login");
 
 })
 
@@ -42,8 +42,9 @@ app.post("/auth", (req, res) => {
 				console.log(`\n[user <${users[i].user}> logged in]`);
 				req.session.loggedin = true;
 				req.session.uid = users[i].uid;
-				res.redirect("/Users/bruh/dex/index.html");
-				res.send(req.session.uid);
+				console.log(req.session)
+				res.render("home");
+				console.log(req.session)
 			}
 			else{
 				console.log(`\n[failed login attempt: <${users[i].user}> incorrect password]`);
@@ -60,19 +61,28 @@ app.post("/auth", (req, res) => {
 
 });
 
+//each login cookie contains:
+
+//		req.session.uid:: 			users id that is currently logged in
+//		req.session.loggedin:: 		boolean logged in value
+
+//cookie is destroyed when user logs out
 
 
 
 
-//home page
 
-//app.get("/home", function(req,res) => {
 
-//	if (req.session.loggedin) {
+//logout request
 
-//	}
+app.post("/logout", (req, res) => {
+	console.log(req.session);
+	req.session.destroy();
+	res.redirect("/")
 
-//});
+});
+
+
 
 
 
@@ -111,20 +121,20 @@ app.post("/signup", (req, res) => {
 //image upload
 
 app.post("/upload", async (req,res) => {
-
-	try{
-		if(!req.files) {
-			res.send("no image attached");
+	if (checklogin(req,res)){
+		try{
+			if(!req.files) {
+				res.send("no image attached");
+			}
+			else{
+				res.send(req.files.post);
+				req.files.post.mv(`./uploads/${req.session.uid}/${req.files.post.name}`)
+				console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
+			}
+		} catch (err) {
+			res.status(500).send(err);
 		}
-		else{
-			res.send(req.files.post);
-			req.files.post.mv(`./uploads/${req.body.uid}/${req.files.post.name}`)
-			console.log(`\n[user <${users[req.body.uid].user}> just posted!]  `)
-		}
-	} catch (err) {
-		res.status(500).send(err);
 	}
-
 });
 
 
@@ -137,11 +147,11 @@ app.post("/upload", async (req,res) => {
 //delete user
 
 app.post("/delete-user" , async (req,res) => {
-
-	deluser(req.body.uid);
-	res.send(`deleted user ${req.body.uid}`)
-	console.log(`\n[deleted user <${req.body.uid}>]`)
-
+	if (checklogin(req,res)){
+		deluser(req.session.uid);
+		console.log(`\n[deleted user <${req.session.uid}>]`);
+		res.render("login");
+	}
 });
 
 
@@ -273,3 +283,15 @@ function getuid(user){
 	}
 }
 
+
+
+
+//check if user is logged in
+
+function checklogin(req,res){
+	if (req.session.loggedin) {
+		return true
+	} else {
+		res.render("login")
+	}
+}
