@@ -1,0 +1,34 @@
+<p>LOG IN?</p>
+<form action="http://localhost:8080/auth" method="POST">
+	username: <input type="text" name="user"><br>
+	password: <input type="text" name="pass"><br>
+ <button type="submit">login</button>
+</form>
+<br>
+
+
+<p>SIGN UP?</p>
+<form action="http://localhost:8080/signup" method="POST">
+	username: <input type="text" name="user"><br>
+	password: <input type="text" name="pass"><br>
+ <button type="submit">sign up</button>
+</form>
+<br>
+
+
+<p>UPLOAD?</p>
+<form action="http://localhost:8080/upload" method="POST" enctype="multipart/form-data">
+	<input type="file" name="post">
+	<input type="text" name="uid">
+	<input type="submit">
+</form>
+<br>
+
+
+
+<p>DEL USER?</p>
+<form action="http://localhost:8080/delete-user" method="POST">
+	uid: <input type="text" name="uid"><br>
+ <button type="submit">delete</button>
+</form>
+<br>

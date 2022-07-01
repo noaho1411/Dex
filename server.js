@@ -3,10 +3,27 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const app = express();
 const fs = require('fs');
+const session = require('express-session');
 
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(fileUpload({ createParentPath: true }));
+app.use(session({
+	secret: "H*44%^^K7@6!yS8$",
+	resave: false,
+	saveUninitialized: true,
+	cookie: { secure: true }
+}));
+app.set("view engine","ejs")
 
+
+
+//main page
+
+app.get("/", (req, res) => {
+
+	res.render("home", {title:"Dex!"});
+
+})
 
 
 
@@ -17,14 +34,16 @@ app.use(fileUpload({ createParentPath: true }));
 
 app.post("/auth", (req, res) => {
 
-	var found=false;
+	found=false;
 	for (i in users){
 		if (req.body.user==users[i].user){
 			found=true;
 			if (req.body.pass==users[i].pass){
-				res.send("hey, "+req.body.user+"!");
-				console.log(`\n[user: <${users[i].user}> logged in]`);
-				break;
+				console.log(`\n[user <${users[i].user}> logged in]`);
+				req.session.loggedin = true;
+				req.session.uid = users[i].uid;
+				res.redirect("/Users/bruh/dex/index.html");
+				res.send(req.session.uid);
 			}
 			else{
 				console.log(`\n[failed login attempt: <${users[i].user}> incorrect password]`);
@@ -42,6 +61,18 @@ app.post("/auth", (req, res) => {
 });
 
 
+
+
+
+//home page
+
+//app.get("/home", function(req,res) => {
+
+//	if (req.session.loggedin) {
+
+//	}
+
+//});
 
 
 
@@ -97,6 +128,21 @@ app.post("/upload", async (req,res) => {
 });
 
 
+
+
+
+
+
+
+//delete user
+
+app.post("/delete-user" , async (req,res) => {
+
+	deluser(req.body.uid);
+	res.send(`deleted user ${req.body.uid}`)
+	console.log(`\n[deleted user <${req.body.uid}>]`)
+
+});
 
 
 
@@ -174,7 +220,56 @@ function adduser(user,pass){
 		uid:  users.length,
 	};
 	users.push(newuser);
-	let data = JSON.stringify(users);
-	fs.writeFileSync("users.json", data);
+	uwrite(users);
+}
+
+
+
+
+//delete user from json
+
+function deluser(uid){
+	users.splice(uid,1);
+	for (let i=uid; i < users.length; i++){
+		users[i].uid=parseInt(i);
+	}
+	uwrite(users);
+}
+
+
+
+
+
+//delete image
+
+function deluser(uid,image){
+	users.splice(uid,1);
+	for (let i=uid; i < users.length; i++){
+		users[i].uid=parseInt(i);
+	}
+	uwrite(users);
+}
+
+
+
+
+//commit list to users json
+
+function uwrite(data){
+	let sdata = JSON.stringify(data);
+	fs.writeFileSync("users.json", sdata);
+}
+
+
+
+
+//get uid of user
+
+function getuid(user){
+	for (i in users){
+		if (req.body.user==users[i].user){
+			return parseInt(i);
+		}
+	}
 }
 
