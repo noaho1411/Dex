@@ -134,7 +134,7 @@ app.post("/upload", async (req,res) => {
 			}
 			else{
 				res.send(req.files.post);
-				req.files.post.mv(`./public/uploads/${req.session.uid}/${req.files.post.name}`)
+				req.files.post.mv(`./uploads/${req.session.uid}/${req.files.post.name}`)
 				console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
 			}
 		} catch (err) {
