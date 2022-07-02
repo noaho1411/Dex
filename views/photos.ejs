@@ -1,0 +1,18 @@
+
+
+<body>
+	<div class="imageholder" style="background-color:black;"></div>
+</body>
+
+<script type="text/javascript">
+
+	let files=<%-JSON.stringify(files)%>;
+	let dir=<%-JSON.stringify(dir)%>
+	for (x in files){
+		let img=document.createElement("img")
+		img.src=String(dir+"/"+files[x]);
+		document.body.appendChild(img);
+	}
+
+
+</script>

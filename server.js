@@ -5,6 +5,7 @@ const app = express();
 const fs = require('fs');
 const session = require('express-session');
 
+
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(fileUpload({ createParentPath: true }));
 app.use(session({
@@ -13,7 +14,9 @@ app.use(session({
 	saveUninitialized: false,
 	cookie: { secure: false }
 }));
-app.set("view engine","ejs")
+app.set("view engine","ejs");
+app.use("/uploads", express.static('uploads'));
+
 
 
 
@@ -42,9 +45,12 @@ app.post("/auth", (req, res) => {
 				console.log(`\n[user <${users[i].user}> logged in]`);
 				req.session.loggedin = true;
 				req.session.uid = users[i].uid;
-				console.log(req.session)
-				res.render("home");
-				console.log(req.session)
+
+				res.render("home",{
+					users:users,
+					req:req
+				});
+
 			}
 			else{
 				console.log(`\n[failed login attempt: <${users[i].user}> incorrect password]`);
@@ -128,7 +134,7 @@ app.post("/upload", async (req,res) => {
 			}
 			else{
 				res.send(req.files.post);
-				req.files.post.mv(`./uploads/${req.session.uid}/${req.files.post.name}`)
+				req.files.post.mv(`./public/uploads/${req.session.uid}/${req.files.post.name}`)
 				console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
 			}
 		} catch (err) {
@@ -153,6 +159,32 @@ app.post("/delete-user" , async (req,res) => {
 		res.render("login");
 	}
 });
+
+
+
+
+
+//view users posts
+
+app.post("/view", async (req,res) => {
+	friend = req.body.friend;
+
+	let dir = `./uploads/${friend}`;
+	fs.readdir(dir, (err,data) => {
+		console.log(data);
+
+		res.render("photos",{
+			files:data,
+			dir:dir
+		});
+		;
+	})
+
+
+
+});
+
+
 
 
 

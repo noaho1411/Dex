@@ -1,7 +1,7 @@
+
 <p>UPLOAD?</p>
 <form action="http://localhost:8080/upload" method="POST" enctype="multipart/form-data">
 	<input type="file" name="post">
-	<input type="text" name="uid">
 	<input type="submit">
 </form>
 <br>
@@ -10,8 +10,7 @@
 
 <p>DEL USER?</p>
 <form action="http://localhost:8080/delete-user" method="POST">
-	uid: <input type="text" name="uid"><br>
- <button type="submit">delete</button>
+	<button type="submit">delete</button>
 </form>
 <br>
 
@@ -20,5 +19,35 @@
 
 <p>LOGOUT?</p>
 <form action="http://localhost:8080/logout" method="POST">
- <button type="submit">logout</button>
+	<button type="submit">logout</button>
 </form>
+<br>
+
+<p>VIEW PHOTOS?</p>
+<form action="http://localhost:8080/view" method="POST">
+	<select name="friend" id="friends">
+	</select>
+	<input type="submit">
+</form>
+
+
+<script type="text/javascript">
+	let dropdown = document.getElementById("friends");
+	let placeholder = document.createElement("option");
+	placeholder.text = "Choose a persons photos to view";
+	dropdown.add(placeholder);
+	dropdown.selectedIndex=0;
+	placeholder.disabled=true;
+
+
+	let users=<%- JSON.stringify(users) %>;
+	//users=<%=users%>;
+
+	for (let i=0; i<users.length; i++){
+		option = document.createElement('option');
+		option.text = users[i].user;
+		option.value = users[i].uid;
+		dropdown.add(option);
+	}
+</script>
+
