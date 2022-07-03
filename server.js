@@ -4,6 +4,7 @@ const fileUpload = require('express-fileupload');
 const app = express();
 const fs = require('fs');
 const session = require('express-session');
+const path = require("path");
 
 
 app.use(bodyParser.urlencoded({ extended: true })); 
@@ -134,8 +135,33 @@ app.post("/upload", async (req,res) => {
 			}
 			else{
 				res.send(req.files.post);
-				req.files.post.mv(`./uploads/${req.session.uid}/${req.files.post.name}`)
-				console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
+
+
+
+				let dir = `./uploads/${req.session.uid}`;
+				fs.readdir(dir, (err,data) => {
+
+
+					let imagemeta = {
+
+						desc:req.body.desc,
+						likes:[]
+
+					}
+
+
+					let meta = JSON.stringify(imagemeta);
+					try{
+						req.files.post.mv(`./uploads/${req.session.uid}/${(data.length+1)/2}${path.extname(req.files.post.name)}`);
+						fs.writeFileSync(`./uploads/${req.session.uid}/${(data.length+1)/2}.json`, meta);
+					} catch {
+						req.files.post.mv(`./uploads/${req.session.uid}/0${path.extname(req.files.post.name)}`);
+						fs.writeFileSync(`./uploads/${req.session.uid}/0.json`, meta);
+					}
+					console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
+
+				});
+
 			}
 		} catch (err) {
 			res.status(500).send(err);
@@ -168,13 +194,30 @@ app.post("/delete-user" , async (req,res) => {
 
 app.post("/view", async (req,res) => {
 	friend = req.body.friend;
-
+	let images=[];
+	let parsedData=[];
 	let dir = `./uploads/${friend}`;
 	fs.readdir(dir, (err,data) => {
 		console.log(data);
 
+		for (x in data){
+			if (path.extname(data[x])!==".json"){
+				if (data[x]!==".DS_Store"){
+					images.push(data[x]);
+				}
+			} else {
+				meta = fs.readFileSync(`uploads/${friend}/${data[x]}`,{encoding:"utf8"});
+				parsedData.push(meta);
+			}
+		}
+		console.log(`images: ${images}`)
+		console.log(`data: ${parsedData}`)
+
+
+
 		res.render("photos",{
-			files:data,
+			files:images.reverse(),
+			meta:parsedData.reverse(),
 			dir:dir
 		});
 		;

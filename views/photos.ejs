@@ -7,11 +7,22 @@
 <script type="text/javascript">
 
 	let files=<%-JSON.stringify(files)%>;
-	let dir=<%-JSON.stringify(dir)%>
+	let dir=<%-JSON.stringify(dir)%>;
+
+	let meta=<%-JSON.stringify(meta)%>;
+
+
+
 	for (x in files){
-		let img=document.createElement("img")
+		let img=document.createElement("img");
 		img.src=String(dir+"/"+files[x]);
 		document.body.appendChild(img);
+
+		let desc=document.createElement("p");
+
+		desc.innerHTML=JSON.parse(meta[x]).likes.length+" likes<br>"  +  JSON.parse(meta[x]).desc;
+		document.body.appendChild(desc);
+
 	}
 
 
