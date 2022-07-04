@@ -198,7 +198,7 @@ app.post("/view", async (req,res) => {
 	let parsedData=[];
 	let dir = `./uploads/${friend}`;
 	fs.readdir(dir, (err,data) => {
-		console.log(data);
+		//console.log(data);
 
 		for (x in data){
 			if (path.extname(data[x])!==".json"){
@@ -210,15 +210,17 @@ app.post("/view", async (req,res) => {
 				parsedData.push(meta);
 			}
 		}
-		console.log(`images: ${images}`)
-		console.log(`data: ${parsedData}`)
+		//console.log(`images: ${images}`)
+		//console.log(`data: ${parsedData}`)
 
-
+		let uid=req.session.uid;
 
 		res.render("photos",{
 			files:images.reverse(),
 			meta:parsedData.reverse(),
-			dir:dir
+			dir:dir,
+			uid:uid,
+			friend:friend
 		});
 		;
 	})
@@ -230,6 +232,43 @@ app.post("/view", async (req,res) => {
 
 
 
+
+
+//like post
+
+app.post("/like", async (req,res) =>{
+
+	let uid = req.session.uid
+	let post = req.body.post
+	let friend = req.body.friend
+	let liked = false;
+
+	
+
+	let data = JSON.parse(fs.readFileSync(`uploads/${friend}/${parseInt(post)}.json`));
+	
+
+
+	for (x in data.likes){
+		if (JSON.stringify([uid,users[uid].user]) == JSON.stringify(data.likes[x])){
+			data.likes.splice(x,1);
+			liked=true;
+		} else{
+			liked=false;
+		}
+	}
+
+	if (liked == false){
+		data.likes.push([uid,users[uid].user]);
+		console.log(`\nuser <${users[uid].user}> unliked <${users[friend].user}>'s post.`)
+	} else{
+		console.log(`\nuser <${users[uid].user}> liked <${users[friend].user}>'s post.`)
+	}
+
+	fs.writeFileSync(`uploads/${friend}/${parseInt(post)}.json`, JSON.stringify(data));
+
+	res.send("liked");
+});
 
 
 
