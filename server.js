@@ -83,9 +83,7 @@ app.post("/auth", (req, res) => {
 //logout request
 
 app.post("/logout", (req, res) => {
-	console.log(req.session);
-	req.session.destroy();
-	res.redirect("/")
+	logout(req,res);
 
 });
 
@@ -182,8 +180,12 @@ app.post("/delete-user" , async (req,res) => {
 	if (checklogin(req,res)){
 		deluser(req.session.uid);
 		console.log(`\n[deleted user <${req.session.uid}>]`);
+
+		logout(req,res);
 		res.render("login");
+		fs.rmSync(`uploads/${req.session.uid}`, { recursive: true, force: true });
 	}
+
 });
 
 
@@ -407,5 +409,21 @@ function checklogin(req,res){
 		return true
 	} else {
 		res.render("login")
+		return false
 	}
+}
+
+
+
+function logout(req,res){
+	try{console.log(`\n[user <${users[req.session.uid].user}> logging out]`);}
+	catch (err) {err=null}
+	req.session.destroy(function(err){
+		if(err){
+			console.log(err);
+		}else{
+			res.redirect("/");
+			res.end();
+		}
+	});
 }

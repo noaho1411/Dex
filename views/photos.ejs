@@ -2,7 +2,19 @@
 
 <body>
 	<div class="imageholder" style="background-color:black;"></div>
+	<div class="editmenu" style="display:hidden" id="editmenu">
+		
+		<form action="http://localhost:8080/edit" method="POST">
+			desc: <input type="text" name="desc"><br>
+ 			<button type="submit">change desc</button>
+		</form>
+		<form action="http://localhost:8080/delete-post" method="POST">
+ 			<button type="submit">delete post</button>
+		</form>
+
+	</div>
 </body>
+
 
 <script type="text/javascript">
 
