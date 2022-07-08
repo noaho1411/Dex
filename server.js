@@ -17,8 +17,13 @@ app.use(session({
 }));
 app.set("view engine","ejs");
 app.use("/uploads", express.static('uploads'));
+app.use(bodyParser.json());
 
 
+global.actives=[]
+let distance=10;
+global.lldistance = distance*.0090210 //actual conversion rate is closer to .009013, 
+									  //but I like the song by travis scott
 
 
 //main page
@@ -119,6 +124,51 @@ app.post("/signup", (req, res) => {
 
 
 
+
+//recieve/respond location
+app.post("/loc", (req,res)=>{
+	
+	let pos = req.body.pos;
+	let nearby = [];
+
+	console.log(`\n[user] <${users[req.session.uid].user}>:: `);
+	console.log(req.body);
+	console.log();
+
+	let status=req.body.pos;
+	let uid=req.session.uid
+
+	if (!status == "left"){
+		global.actives.splice(uid,1);
+	} else{
+
+		for (person in global.actives){
+			if (parseInt(person)!==parseInt(uid)){
+
+				let rise=(Math.abs(global.actives[person].lng)-Math.abs(status.lng));
+				let run=(Math.abs(global.actives[person].lat)-Math.abs(status.lat));
+
+				let distance = Math.sqrt((rise*rise)+(run*run));
+
+				//pythag, maths extension top student #1
+
+				if (distance < lldistance){
+					nearby[person]=global.actives[person];
+				}	
+
+			}
+		}
+
+		global.actives[uid]=status;
+
+	}
+
+	res.send(nearby);
+	for (x in nearby){
+		console.log(x+"is nearby")
+	} 
+
+});
 
 
 
@@ -302,7 +352,7 @@ fs.readFile("users.json", (err, data) => {
 
 
 
-
+//edit description
 
 app.post("/edit", (req, res) => {
 
@@ -316,6 +366,8 @@ app.post("/edit", (req, res) => {
 });
 
 
+
+//delete post
 
 app.post("/delete-post", (req, res) => {
 
