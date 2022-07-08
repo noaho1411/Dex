@@ -8,6 +8,74 @@
 <br>
 
 
+<p>MAP</p>
+<p id="location"></p>
+<div id="map" style="width:50%; height:50%;"></div>
+
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYF6pP4axgG1Orx-vwu-AuDty-yJFBC_U&callback=initmap"></script>
+
+<script>
+	let tool = document.getElementById("location");
+	var map;
+
+
+	function initmap() {
+		map = new google.maps.Map(document.getElementById("map"), {
+		center: { lat: 142.1996, lng: 11.3493 },
+		mapId: "e523f61bced7fe1e",
+		zoom: 8,
+		});
+		getLoc(map);
+		map.onmousedown=function(){window.down=true;}
+		map.onmouseup=function(){window.down=false;}
+
+	}	
+
+
+	function getLoc(){
+		if (navigator.geolocation){
+			navigator.geolocation.watchPosition(track);
+		} else{ 
+			tool.textContent = "Browser does not support location feature";
+		}
+	}
+
+
+	function posErr(err){
+		switch(err.code){
+			case err.PERMISSION_DENIED:
+				tool.textContent="please allow Dex to view your position";
+			case TIMEOUT:
+				tool.textContent="connection to location server timed out";
+			default:
+				tool.textContent="an error occured";
+		}
+	}
+
+	function track(pos){
+		try{me.setMap(null);
+		me=null;} catch{console.log("oh well")}
+		console.log(pos)
+		tool.textContent=`lat: ${pos.coords.latitude} \n lon: ${pos.coords.longitude}`;
+		let localpos = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+		if (!window.down){
+			map.setCenter(localpos);
+			console.log("moved")
+		}
+		me = new google.maps.Marker({
+			position:localpos,
+			map:map
+		})
+		console.log("refreshed");
+
+	}
+
+	window.initmap = initmap;
+
+
+</script>
+<br>
 
 <p>DEL USER?</p>
 <form action="http://localhost:8080/delete-user" method="POST">
