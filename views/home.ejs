@@ -2,9 +2,19 @@
 	AAAAAMDLADNFJKWNDJKFGBNAKJDBGKJSFBGBDFKG
 	SDFSKBDGHJBSFHJBGJSHFBGHBSFGHJBJHSDFG-->
 
+<style>
+a[href^="http://maps.google.com/maps"]{display:none !important}
+a[href^="https://maps.google.com/maps"]{display:none !important}
 
+.gmnoprint a, .gmnoprint span, .gm-style-cc {
+    display:none;
+}
+.gmnoprint div {
+    background:none !important;
+}
+</style>
 
-
+<body>
 
 <p>UPLOAD?</p>
 <form action="http://localhost:8080/upload" method="POST" enctype="multipart/form-data">
@@ -46,6 +56,7 @@
 		center: { lat: 142.1996, lng: 11.3493 },
 		mapId: "e523f61bced7fe1e",
 		zoom: 8,
+		disableDefaultUI: true,
 		});
 		getLoc(map);
 		map.onmousedown=function(){window.down=true;}
