@@ -147,15 +147,20 @@ app.post("/upload", async (req,res) => {
 
 					}
 
+					let highest=0
+					for (x in data){
+						let temp=parseInt(path.parse(data[x]).name);
+						if (temp > highest){
+							highest=temp
+						}
+					}
+
 
 					let meta = JSON.stringify(imagemeta);
-					try{
-						req.files.post.mv(`./uploads/${req.session.uid}/${(data.length+1)/2}${path.extname(req.files.post.name)}`);
-						fs.writeFileSync(`./uploads/${req.session.uid}/${(data.length+1)/2}.json`, meta);
-					} catch {
-						req.files.post.mv(`./uploads/${req.session.uid}/0${path.extname(req.files.post.name)}`);
-						fs.writeFileSync(`./uploads/${req.session.uid}/0.json`, meta);
-					}
+
+					req.files.post.mv(`./uploads/${req.session.uid}/${highest+1}${path.extname(req.files.post.name)}`);
+					fs.writeFileSync(`./uploads/${req.session.uid}/${highest+1}.json`, meta);
+					
 					console.log(`\n[user <${users[req.session.uid].user}> just posted!]  `)
 
 				});
@@ -293,6 +298,34 @@ fs.readFile("users.json", (err, data) => {
 	//[01]	{user: "admin", pass:"admin1", uid: "000000001"}
 
 	//		]
+
+
+
+
+
+
+app.post("/edit", (req, res) => {
+
+	dir=`uploads/${req.session.uid}/${req.body.post.slice(0,-4)}.json`;
+	console.log(`\nuser <${users[req.session.uid].user}> editing ${dir}`);
+	let temp = JSON.parse(fs.readFileSync(dir));
+	temp.desc=req.body.newdesc;
+	fs.writeFileSync(dir, JSON.stringify(temp));
+
+
+});
+
+
+
+app.post("/delete-post", (req, res) => {
+
+	dir=`uploads/${req.session.uid}/${req.body.post.slice(0,-4)}`;
+	fs.rmSync(`${dir}.png`);
+	fs.rmSync(`${dir}.json`);
+	
+
+
+});
 
 
 

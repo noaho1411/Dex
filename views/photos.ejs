@@ -1,18 +1,40 @@
 
+<style>
+
+	#editmenu {
+		background-color:grey;
+		border-radius: 15px;
+		padding:15px;
+		z-index:999;
+		position:fixed;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+</style>
+
 
 <body>
 	<div class="imageholder" style="background-color:black;"></div>
-	<div class="editmenu" style="display:hidden" id="editmenu">
+
+
+
+	<div class="editmenu" style="display:none" id="editmenu">
 		
-		<form action="http://localhost:8080/edit" method="POST">
-			desc: <input type="text" name="desc"><br>
+		<form id = "desc" action="http://localhost:8080/edit" method="POST">
+			desc: <input type="text" name="newdesc"><br>
  			<button type="submit">change desc</button>
 		</form>
-		<form action="http://localhost:8080/delete-post" method="POST">
+		<form id = "del" action="http://localhost:8080/delete-post" method="POST">
  			<button type="submit">delete post</button>
 		</form>
 
 	</div>
+
+
+
+
 </body>
 
 
@@ -33,8 +55,21 @@
 	//}
 
 	function editpost(post){
-		window.alert(`editing post ${post}`);
-		post("edit", {element: "osmium"});
+		//window.alert(`editing post ${post}`);
+
+		document.getElementById("editmenu").style.display="block";
+
+		let helper = document.createElement("input")
+		helper.type="hidden";
+		helper.value=post;
+		helper.name="post";
+
+		document.getElementById("desc").appendChild(helper);
+
+
+		delhelper = helper.cloneNode();
+		document.getElementById("del").appendChild(delhelper);
+
 	}
 
 
@@ -72,7 +107,7 @@
 
 			let sub=document.createElement("input");
 			sub.type="submit";
-			sub.textContent="like";
+			sub.value="like";
 
 
 			let post=document.createElement("input");
