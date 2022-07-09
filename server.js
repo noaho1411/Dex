@@ -5,6 +5,8 @@ const app = express();
 const fs = require('fs');
 const session = require('express-session');
 const path = require("path");
+const sharp = require("sharp");
+const sizeOf = require('image-size')
 
 
 
@@ -336,6 +338,66 @@ app.post("/like", async (req,res) =>{
 
 
 
+app.post("/avatar", async (req,res) => {
+
+	if (checklogin(req,res)){
+			if(!req.files) {
+				res.send("no image attached");
+				console.log("imsmsart")
+			}
+			else{
+				res.render("home",{
+					users:users,
+					req:req
+				});
+
+
+				//console.log(req.files.avatar.data)
+				let dir = `./uploads/${req.session.uid}`;
+
+				let imgsize = sizeOf(req.files.avatar.data);
+				//console.log(imgsize);
+
+				if (imgsize.width>imgsize.height){
+					global.mult = imgsize.width/40;
+					//console.log("constant is set")
+					console.log(mult);
+				}
+				else{
+					global.mult = imgsize.height/40;
+					//console.log("constant is set")
+					console.log(mult);
+				}	
+
+
+				let width= parseInt(imgsize.width/global.mult);
+				let height = parseInt(imgsize.height/global.mult);
+
+				//console.log(width,height)
+
+				
+				sharp(req.files.avatar.data).resize({ height: height, width: width }).toFile(`./uploads/${req.session.uid}/avatar.png`)
+				.then(function(newFileInfo) {
+					console.log("Success")
+				})
+				.catch(function(err) {
+					console.log(err);
+				});
+
+
+
+				//req.files.avatar.mv(`./uploads/${req.session.uid}/avatar.png`);
+					
+				console.log(`\n[user <${users[req.session.uid].user}> just updated their avatar]`);
+
+			}
+
+	}
+});
+
+
+
+/*
 //LET USER CUSTOMISE AVATAR
 
 app.post("/avatar", async (req,res) =>{
@@ -392,7 +454,7 @@ app.post("/saveavatar", async (req,res) => {
 
 });
 
-
+*/
 
 
 

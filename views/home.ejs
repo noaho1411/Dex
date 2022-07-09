@@ -73,7 +73,7 @@
 		map = new google.maps.Map(document.getElementById("map"), {
 		center: { lat: 142.1996, lng: 11.3493 },
 		mapId: "e523f61bced7fe1e",
-		zoom: 8,
+		zoom: 16,
 		disableDefaultUI: true,
 		});
 		getLoc(map);
@@ -114,6 +114,12 @@
 	function addmarkers(nearby){
 		let selector = document.getElementById("friends");
 		let form = document.getElementById("form");
+		console.log(window.markers)
+		try{for (mark in window.markers){
+			window.markers[mark].setMap(null);
+		}} catch (err){console.log(err)}
+		window.markers=[]
+
 		for (marker in nearby){
 			if (nearby[marker]){
 				let index=marker;
@@ -125,6 +131,7 @@
 					map:map,
 					icon:`uploads/${index}/avatar.png`
 				})	
+				window.markers.push(marker);
 				
 
 
@@ -269,7 +276,8 @@
 	<button id="close" style="" onclick="unset()">x</button>
 
 	<p>EDIT AVATAR?</p>
-	<form action="http://localhost:8080/avatar" method="POST">
+	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
+		<input type="file" name="avatar">
 		<button type="submit">edit</button>
 	</form>
 	<br>

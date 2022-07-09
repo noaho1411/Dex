@@ -1,0 +1,5 @@
+-butmoji customiser
+
+0each pserom gets their own icon on map
+
+-remove google maps controls from website
