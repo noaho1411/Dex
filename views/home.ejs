@@ -3,15 +3,32 @@
 	SDFSKBDGHJBSFHJBGJSHFBGHBSFGHJBJHSDFG-->
 
 <style>
-a[href^="http://maps.google.com/maps"]{display:none !important}
-a[href^="https://maps.google.com/maps"]{display:none !important}
+	a[href^="http://maps.google.com/maps"]{display:none !important}
+	a[href^="https://maps.google.com/maps"]{display:none !important}
 
-.gmnoprint a, .gmnoprint span, .gm-style-cc {
-    display:none;
-}
-.gmnoprint div {
-    background:none !important;
-}
+	.gmnoprint a, .gmnoprint span, .gm-style-cc {
+	    display:none;
+	}
+	.gmnoprint div {
+	    background:none !important;
+	}
+
+
+	#usersettings, #delprompt{
+		position:fixed;
+		background:grey;
+		border-radius:15px;
+		padding:15px;
+		left: 50%;
+		top: 50%;
+		width:200px;
+		transform: translate(-50%, -50%);
+		z-index:999;
+
+	}
+	#delprompt{
+		background:black;
+	}
 </style>
 
 <body>
@@ -40,7 +57,8 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYF6pP4axgG1Orx-vwu-AuDty-yJFBC_U&callback=initmap"></script>
 
 <script>
-	var users=<%-JSON.stringify(users)%>
+	var users=<%-JSON.stringify(users)%>;
+	window.uid=<%-JSON.stringify(req.session.uid)%>;
 	let tool = document.getElementById("location");
 	var map;
 
@@ -105,6 +123,7 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 					//in the same physical location, all the tabs stack on eachother
 					//so I set them to a distance away for testing
 					map:map,
+					icon:`uploads/${index}/avatar.png`
 				})	
 				
 
@@ -139,7 +158,31 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 
 	function getLoc(){
 		if (navigator.geolocation){
-			navigator.geolocation.watchPosition(track);
+
+			async function update(first) {
+				if (!first){
+					let p = new Promise(function(resolve,reject) {
+							console.log("not first")
+							setTimeout(() => {
+						 		resolve();
+						 		navigator.geolocation.getCurrentPosition(track);
+
+						 		
+							}, 5000);
+					});
+					await p;
+					update(false);
+
+				} else{
+					first=false;
+					navigator.geolocation.getCurrentPosition(track);
+				 	update(false);
+				}
+				//console.log("gettinghere");update(false);
+			}
+
+
+		update(true);
 		} else{ 
 			tool.textContent = "Browser does not support location feature";
 		}
@@ -172,36 +215,86 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 		}
 		me = new google.maps.Marker({
 			position:localpos,
-			map:map
+			map:map,
+			icon:`uploads/${window.uid}/avatar.png`
 		})
+		google.maps.event.addDomListener(me, 'click', function() {
+					
+					let form = document.getElementById("form");
+
+					let friend = document.createElement("input")
+					friend.value=uid;
+					friend.name="friend";
+
+					form.appendChild(friend);
+					form.submit();
+					//form.submit();
+				})
 		console.log("refreshed");
 
 		comLoc(localpos);
+		//adds markers
+
+
 
 	}
 
 	window.initmap = initmap;
 
 
+	function uset(){
+		document.getElementById("usersettings").style.display="block";
+		//document.getElementById("set").style.display="none";
+	} function unset(){
+		document.getElementById("usersettings").style.display="none";
+		//document.getElementById("set").style.display="block";
+	}
+
+
+	function delprompt(){
+		document.getElementById("delprompt").style.display="block";
+	} function canceldel(){
+		document.getElementById("delprompt").style.display="none";
+	}
+
 </script>
 <br>
 
-<p>DEL USER?</p>
-<form action="http://localhost:8080/delete-user" method="POST">
-	<button type="submit">delete</button>
-</form>
-<br>
+<p>USER SETTINGS:</p>
+<button id="set"onclick="uset()">settings</button>
+
+
+<div id="usersettings" style="display:none;">
+
+	<button id="close" style="" onclick="unset()">x</button>
+
+	<p>EDIT AVATAR?</p>
+	<form action="http://localhost:8080/avatar" method="POST">
+		<button type="submit">edit</button>
+	</form>
+	<br>
+
+
+	<p>DEL USER?</p>
+	<button id="delete" onclick="delprompt()">delete user</button>
+	<div id="delprompt" style="display:none;">
+		<form action="http://localhost:8080/delete-user" method="POST">
+			<button type="submit">delete</button>
+		</form>
+		<button id="cancel" onclick="canceldel()">cancel</button>
+	</div>
+	<br>
 
 
 
 
-<p>LOGOUT?</p>
-<form action="http://localhost:8080/logout" method="POST">
-	<button type="submit">logout</button>
-</form>
-<br>
+	<p>LOGOUT?</p>
+	<form action="http://localhost:8080/logout" method="POST">
+		<button type="submit">logout</button>
+	</form>
+	<br>
 
-
+</div>
 
 <script type="text/javascript">
 	let dropdown = document.getElementById("friends");
@@ -210,5 +303,4 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 	dropdown.add(placeholder);
 	dropdown.selectedIndex=0;
 	placeholder.disabled=true;
-</script>-->
-
+</script>

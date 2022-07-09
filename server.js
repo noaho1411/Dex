@@ -7,6 +7,7 @@ const session = require('express-session');
 const path = require("path");
 
 
+
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(fileUpload({ createParentPath: true }));
 app.use(session({
@@ -17,6 +18,7 @@ app.use(session({
 }));
 app.set("view engine","ejs");
 app.use("/uploads", express.static('uploads'));
+app.use("/avatar", express.static('avatar'));
 app.use(bodyParser.json());
 
 
@@ -182,7 +184,10 @@ app.post("/upload", async (req,res) => {
 				res.send("no image attached");
 			}
 			else{
-				res.send(req.files.post);
+				res.render("home",{
+					users:users,
+					req:req
+				});
 
 
 
@@ -256,7 +261,8 @@ app.post("/view", async (req,res) => {
 	let dir = `./uploads/${friend}`;
 	fs.readdir(dir, (err,data) => {
 		//console.log(data);
-
+		let av = data.indexOf("avatar.png");
+		data.splice(av,1);
 		for (x in data){
 			if (path.extname(data[x])!==".json"){
 				if (data[x]!==".DS_Store"){
@@ -324,8 +330,68 @@ app.post("/like", async (req,res) =>{
 
 	fs.writeFileSync(`uploads/${friend}/${parseInt(post)}.json`, JSON.stringify(data));
 
-	res.send("liked");
+	//res.redirect('back');
 });
+
+
+
+
+//LET USER CUSTOMISE AVATAR
+
+app.post("/avatar", async (req,res) =>{
+
+	function initparts(part){
+		return fs.readdirSync(`avatar/${part}`);
+	}
+
+	const eyebrows = initparts("eyebrows");
+	const eyes = initparts("eyes");
+	const mouth = initparts("mouth");
+	const nose = initparts("nose");
+
+
+	parts = [eyebrows,eyes,nose,mouth]
+
+	res.render("avatar", {
+		req:req,
+		parts:parts
+	});
+
+});
+
+
+//save avatar
+
+app.post("/saveavatar", async (req,res) => {
+
+
+	let image = req.body.img;
+
+	let uid = req.session.uid;
+
+
+	var regex = /^data:.+\/(.+);base64,(.*)$/;
+
+	var matches = image.match(regex);
+	var ext = matches[1];
+	var data = matches[2];
+	var buffer = Buffer.from(data, 'base64');
+	fs.writeFileSync(`uploads/${uid}/avatar.${ext}`, buffer);
+
+	//const buffer = Buffer.from(image, "base64");
+	//console.log(buffer)
+	//fs.writeFileSync(`./uploads/${uid}/avatar.jpg`, buffer)
+
+	
+	//image.mv(`./uploads/${uid}/avatar.png`);
+	res.render("home",{
+					users:users,
+					req:req
+				});
+	
+
+});
+
 
 
 
@@ -361,6 +427,8 @@ app.post("/edit", (req, res) => {
 	let temp = JSON.parse(fs.readFileSync(dir));
 	temp.desc=req.body.newdesc;
 	fs.writeFileSync(dir, JSON.stringify(temp));
+
+	res.send("updated desc");
 
 
 });

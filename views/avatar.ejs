@@ -1,0 +1,200 @@
+<style>
+
+	.face{
+		position:absolute;
+		top:250px;
+		left:250px;
+
+	}
+
+</style>
+
+	
+
+<body>
+<p> hi</p>
+
+	<div id="avatar"></div>
+
+	<button onclick="move('eyebrows','left')"><</button>eyebrows<button onclick="move('eyebrows','right')">></button><br><br>
+	<button onclick="move('eyes','left')"><</button>eyes<button onclick="move('eyes','right')">></button><br><br>
+	<button onclick="move('nose','left')"><</button>nose<button onclick="move('nose','right')">></button><br><br>
+	<button onclick="move('mouth','left')"><</button>mouth<button onclick="move('mouth','right')">></button>
+
+
+	<br><br><br>
+	<button onclick="save()">save</button>
+
+	<form action="/saveavatar" method="POST" id="form"></form>
+
+</style>
+
+<script>
+
+	let uid = <%-JSON.stringify(req.session.uid)%>;
+
+	let dir = `uploads/${uid}/avatar.png`;
+
+	let parts = <%-JSON.stringify(parts)%>;
+
+
+	const eyebrows = parts[0];
+	const eyes = parts[1];
+	const nose = parts[2];
+	const mouth = parts[3];
+
+	window.selected=[eyebrows[0],eyes[0],nose[0],mouth[0]]
+
+	updateface(selected);
+
+
+	function updateface(selected){
+
+
+		for (part in selected){
+			let string = selected[part];
+			let partimg = document.createElement("img")
+			partimg.id=part;
+			partimg.src=`./avatar/${string.substring(0, string.length - 4).replace(/\d+$/, "")}/${string}`
+			partimg.classList.add("face");
+			document.body.appendChild(partimg);
+		}
+
+	}
+
+	function move(part,direction){
+
+		changed=true;
+		switch (part){
+
+		case "eyebrows":
+			//console.log(`cur:${selected[0]} lowest:${parts[0][0]}  cur:${selected[0]} high:${parts[0][parts[0].length-1]}`)
+
+			if (direction=="left" && selected[0]!==parts[0][0]){
+				selected[0]=eyebrows[eyebrows.indexOf(selected[0])-1];
+
+			} else if (direction == "right" && selected[0]!==parts[0][parts[0].length-1]){
+				selected[0]=eyebrows[eyebrows.indexOf(selected[0])+1];
+			} else{
+				console.log("dont move");
+				changed=false;
+			}
+
+			if (changed){
+				console.log("changed eyebrows")
+				for (x in [0,1,2,3]){
+					document.getElementById(x).remove();
+				}
+				updateface(selected);
+			}
+
+			break;
+		case "eyes":
+
+			//console.log(`cur:${selected[1]} lowest:${parts[1][0]}  cur:${selected[1]} high:${parts[1][parts[1].length-1]}`)
+
+			if (direction=="left" && selected[1]!==parts[1][0]){
+				selected[1]=eyes[eyes.indexOf(selected[1])-1];
+
+			} else if (direction == "right" && selected[1]!==parts[1][parts[1].length-1]){
+				selected[1]=eyes[eyes.indexOf(selected[1])+1];
+			} else{
+				console.log("dont move");
+				changed=false;
+			}
+
+			if (changed){
+				console.log("changed eyes")
+				for (x in [0,1,2,3]){
+					document.getElementById(x).remove();
+				}
+				updateface(selected);
+			}
+
+
+			break;
+		case "nose":
+
+			if (direction=="left" && selected[2]!==parts[2][0]){
+				selected[2]=nose[nose.indexOf(selected[2])-1];
+
+				console.log(nose[nose.indexOf(selected[2])+1]);
+				console.log(selected[2]) ;
+
+
+			} else if (direction == "right" && selected[2]!==parts[2][parts[2].length-1]){
+				console.log(selected[2], parts[2][parts[2].length-1]);
+				selected[2]=nose[nose.indexOf(selected[2])+1];
+			} else{
+				console.log("dont move");
+				changed=false;
+			}
+
+			if (changed){
+				console.log("changed eyes")
+				for (x in [0,1,2,3]){
+					document.getElementById(x).remove();
+				}
+				updateface(selected);
+			}
+
+
+			break;
+		default:
+
+			if (direction=="left" && selected[3]!==parts[3][0]){
+				selected[3]=mouth[mouth.indexOf(selected[3])-1];
+
+			} else if (direction == "right" && selected[3]!==parts[3][parts[3].length-1]){
+				selected[3]=mouth[mouth.indexOf(selected[3])+1];
+			} else{
+				console.log("dont move");
+				changed=false;
+			}
+
+			if (changed){
+				console.log("changed eyes")
+				for (x in [0,1,2,3]){
+					document.getElementById(x).remove();
+				}
+				updateface(selected);
+			}
+
+
+		}
+	}
+
+	function save(){
+		var canvas = document.createElement("canvas");
+		canvas.id="canvas";
+		canvas.width=77;
+		canvas.height=72;
+		//canvas.display:none;
+		var ctx=canvas.getContext("2d");
+		ctx.fillStyle='white';
+		ctx.fillRect(7,0,canvas.width-10,canvas.height+7);
+
+		//var imgs=[xeyebrows,xeyes,xnose,xmouth];
+		for (x in [0,1,2,3]){
+			let temp = document.getElementById(x);
+			ctx.drawImage(temp,0,0,77,72);
+		}
+
+		var img = canvas.toDataURL("image/png");
+
+		let option = document.createElement("input")
+		option.type="hidden";
+		option.value=img;
+		option.name="img";
+
+		let form = document.getElementById("form");
+
+		form.appendChild(option);
+		form.submit();
+
+		
+
+
+	}
+
+</script>
