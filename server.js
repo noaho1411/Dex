@@ -56,9 +56,17 @@ app.post("/auth", (req, res) => {
 				req.session.loggedin = true;
 				req.session.uid = users[i].uid;
 
+
+				try{
+					var data = JSON.parse(fs.readFileSync(`friends/${req.session.uid}/friends.json`));
+				}catch (err){ var data = {confirmed:[]}}
+
+
+				console.log(data.confirmed)
 				res.render("home",{
 					users:users,
-					req:req
+					req:req,
+					friends:data.confirmed
 				});
 
 			}
@@ -114,9 +122,18 @@ app.post("/signup", (req, res) => {
 	}
 	if (!found){
 
-		adduser(req.body.user,req.body.pass);
+		let uid = adduser(req.body.user,req.body.pass);
 		res.send(`created new user ${req.body.user}`);
 		console.log(`\n[user <${req.body.user}> just joined!]  `);
+
+
+		fs.mkdirSync(`uploads/${uid}`, { recursive: true }, (err) => {
+			if (err) throw err;
+		});
+
+		fs.copyFileSync("default.jpeg",`uploads/${uid}/avatar.png`)
+
+
 	}
 	else{
 		res.send("user already exists");
@@ -186,9 +203,13 @@ app.post("/upload", async (req,res) => {
 				res.send("no image attached");
 			}
 			else{
+				try{
+					var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
+				}catch{ var data = {confirmed:[]}}
 				res.render("home",{
 					users:users,
-					req:req
+					req:req,
+					friends:data.confirmed
 				});
 
 
@@ -280,12 +301,26 @@ app.post("/view", async (req,res) => {
 
 		let uid=req.session.uid;
 
+		try{
+			var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
+			if (data.confirmed.includes(friend)){
+				var friendstatus = true;
+			}else{
+				var friendstatus = false;
+			}
+		}catch{
+			var friendstatus = false;
+		}
+
+
 		res.render("photos",{
 			files:images.reverse(),
 			meta:parsedData.reverse(),
 			dir:dir,
 			uid:uid,
-			friend:friend
+			friend:friend,
+			user:users[friend].user,
+			friendstatus:friendstatus
 		});
 		;
 	})
@@ -296,6 +331,76 @@ app.post("/view", async (req,res) => {
 
 
 
+//add friend
+
+app.post("/friend", async (req,res) => {
+
+	let friend = req.body.friend.toString();
+	let uid = req.session.uid.toString();
+
+
+	try{
+		var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
+	}catch{
+		let friends = {
+			outgoing:[],
+			confirmed:[],
+			incoming:[]
+		}
+		fs.mkdirSync(`friends/${uid}`, { recursive: true }, (err) => {
+			if (err) throw err;
+		});
+
+		fs.writeFileSync(`friends/${uid}/friends.json`, JSON.stringify(friends));
+		var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
+	}
+
+	try{
+		var frienddata = JSON.parse(fs.readFileSync(`friends/${friend}/friends.json`));
+	}catch{
+		let friends = {
+			outgoing:[],
+			confirmed:[],
+			incoming:[]
+		}
+		fs.mkdirSync(`friends/${friend}`, { recursive: true }, (err) => {
+			if (err) throw err;
+		});
+		fs.writeFileSync(`friends/${friend}/friends.json`, JSON.stringify(friends));
+		var frienddata = JSON.parse(fs.readFileSync(`friends/${friend}/friends.json`));
+	}
+
+	if (frienddata.outgoing.includes(uid)){
+		//add friends for both
+		//clear firends outgoing and my incoming
+		data.confirmed.push(friend);
+		frienddata.confirmed.push(uid);
+		data.incoming.splice(data.incoming.indexOf(friend),1);
+		frienddata.outgoing.splice(frienddata.outgoing.indexOf(uid),1);
+	} else if (frienddata.incoming.includes(uid)){
+		//remove friend from friend incoming and my outgoing
+		//cancel request
+		data.outgoing.splice(data.outgoing.indexOf(friend),1);
+		frienddata.incoming.splice(frienddata.incoming.indexOf(uid),1);
+	} else if (frienddata.confirmed.includes(uid)){
+		//remove friend for both
+		//unfriend
+		data.confirmed.splice(data.confirmed.indexOf(friend),1);
+		frienddata.confirmed.splice(frienddata.confirmed.indexOf(uid),1);
+	} else {
+		//add to friends incoming, and my outgoing
+		frienddata.incoming.push(uid);
+		data.outgoing.push(friend);
+	}
+
+	fs.writeFileSync(`friends/${friend}/friends.json`, JSON.stringify(frienddata));
+	fs.writeFileSync(`friends/${uid}/friends.json`, JSON.stringify(data));
+
+
+
+
+
+});
 
 
 
@@ -346,9 +451,14 @@ app.post("/avatar", async (req,res) => {
 				console.log("imsmsart")
 			}
 			else{
+				try{
+					var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
+				}catch{ var data = {confirmed:[]}}
+
 				res.render("home",{
 					users:users,
-					req:req
+					req:req,
+					friends:data.confirmed
 				});
 
 
@@ -562,6 +672,7 @@ function adduser(user,pass){
 	};
 	users.push(newuser);
 	uwrite(users);
+	return newuser.uid;
 }
 
 

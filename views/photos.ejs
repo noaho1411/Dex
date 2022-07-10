@@ -16,6 +16,10 @@
 
 
 <body>
+
+	<p class="name" id="name"></p>
+	<p class="friends" id="friends">You and this user are not friends.</p>
+
 	<div class="imageholder" style="background-color:black;"></div>
 
 
@@ -46,6 +50,71 @@
 	const uid=<%-JSON.stringify(uid)%>;
 	const meta=<%-JSON.stringify(meta)%>;
 	const friend=<%-JSON.stringify(friend)%>;
+	const user=<%-JSON.stringify(user)%>;
+	let friendstatus=<%-JSON.stringify(friendstatus)%>;
+
+	if(friendstatus){
+		document.getElementById("friends").textContent="You and this user are friends";
+	}
+
+
+
+	document.getElementById("name").textContent=user;
+
+	let img=document.createElement("img");
+	img.src=String(dir+"/avatar.png");
+	document.body.appendChild(img);
+
+	if (uid==friend){
+
+		let tip = document.createElement("p");
+		tip.textContent = "edit avatar:";
+		document.body.appendChild(tip);
+
+		let edit = document.createElement("form");
+		edit.action="http://localhost:8080/avatar";
+		edit.method="POST"
+		edit.enctype="multipart/form-data";
+
+		let input = document.createElement("input")
+		input.type = "file";
+		input.name = "avatar";
+
+		let submit = document.createElement("button")
+		submit.type="submit";
+		submit.textContent="upload";
+
+		edit.appendChild(input);
+		edit.appendChild(submit);
+		document.body.appendChild(edit);
+		document.body.appendChild(document.createElement("br"));
+	} else {
+
+
+		let tip = document.createElement("p");
+		tip.textContent = "friend?";
+		document.body.appendChild(tip);
+
+		let edit = document.createElement("form");
+		edit.action="http://localhost:8080/friend";
+		edit.method="POST"
+		edit.enctype="multipart/form-data";
+
+		let input = document.createElement("input")
+		input.type = "hidden";
+		input.value=friend;
+		input.name = "friend";
+
+		let submit = document.createElement("button")
+		submit.type="submit";
+		submit.textContent="add friend";
+
+		edit.appendChild(input);
+		edit.appendChild(submit);
+		document.body.appendChild(edit);
+		document.body.appendChild(document.createElement("br"));
+
+	}
 
 
 

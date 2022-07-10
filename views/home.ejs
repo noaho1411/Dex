@@ -29,6 +29,8 @@
 	#delprompt{
 		background:black;
 	}
+	nav ul{height:200px; width:300px;}
+	nav ul{overflow:hidden; overflow-y:scroll;}
 </style>
 
 <body>
@@ -45,13 +47,25 @@
 <p>MAP</p>
 <p id="location"></p>
 <div id="map" style="width:50%; height:50%;"></div>
+<br><br>
 
-<p>NEARBY:</p>
+<button onclick="shownearby()">nearby users</button><button onclick="showfriends()">friends</button>
+<div id="selector">
+<nav id="nearby">
+	<ul id ="list">
+	</ul>
+</nav>
+<nav id="friends" style="display:none;">
+	<ul id ="friendlist">
+	</ul>
+</nav>
+</div>
+<!--
 <form id="form" action="http://localhost:8080/view" method="POST">
 	<select name="friend" id="friends">
 	</select>
 	<input type="submit">
-</form>
+</form>-->
 
 
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYF6pP4axgG1Orx-vwu-AuDty-yJFBC_U&callback=initmap"></script>
@@ -59,14 +73,65 @@
 <script>
 	var users=<%-JSON.stringify(users)%>;
 	window.uid=<%-JSON.stringify(req.session.uid)%>;
+
+	var friends=<%-JSON.stringify(friends)%>;
+
+
 	let tool = document.getElementById("location");
 	var map;
+
+	console.log(friends)
+	for (index in friends){
+		let form = document.createElement("form");
+		form.action="http://localhost:8080/view";
+		form.method="POST";
+		form.id=index;
+
+
+		let friend = document.createElement("input")
+		friend.value=friends[index];
+		friend.name="friend";
+		friend.type="hidden";
+		form.appendChild(friend);
+
+		document.body.appendChild(form);
+
+
+		let each = document.createElement("button");
+		each.style.width="300px";
+		each.style.height="50px";
+		if (index%2==0){
+			each.style.background="grey";
+		}
+		each.onclick=function(){document.getElementById(index).submit()};
+		//each.onclick=function(){form.submit()};
+
+		let p = document.createElement("p");
+		p.textContent=users[friends[index]].user;
+
+		each.appendChild(p);
+		document.getElementById("friendlist").appendChild(each);
+	}
+
 
 
 	window.addEventListener("beforeunload", function (e) {
 		comLoc("left")
 
 	});
+
+
+
+	function shownearby(){
+		document.getElementById("nearby").style.display="block";
+		document.getElementById("friends").style.display="none";
+	}
+
+		function showfriends(){
+		document.getElementById("nearby").style.display="none";
+		document.getElementById("friends").style.display="block";
+	}
+
 
 
 	function initmap() {
@@ -112,13 +177,16 @@
 
 
 	function addmarkers(nearby){
-		let selector = document.getElementById("friends");
-		let form = document.getElementById("form");
+		//let selector = document.getElementById("friends");
+		//let form = document.getElementById("form");
 		console.log(window.markers)
 		try{for (mark in window.markers){
 			window.markers[mark].setMap(null);
 		}} catch (err){console.log(err)}
 		window.markers=[]
+
+
+		document.getElementById("list").innerHTML="";
 
 		for (marker in nearby){
 			if (nearby[marker]){
@@ -134,13 +202,35 @@
 				window.markers.push(marker);
 				
 
+				let form = document.createElement("form");
+				form.action="http://localhost:8080/view";
+				form.method="POST";
+				form.id=index;
 
-				let friend = document.createElement("option")
+
+				let friend = document.createElement("input")
 				friend.value=index;
-				//friend.name="friend";
-				friend.type="option";
-				friend.text=users[index].user;
-				selector.add(friend);
+				friend.name="friend";
+				friend.type="hidden";
+				form.appendChild(friend);
+
+				document.body.appendChild(form);
+
+
+				let each = document.createElement("button");
+				each.style.width="300px";
+				each.style.height="50px";
+				if (index%2==0){
+					each.style.background="grey";
+				}
+				each.onclick=function(){document.getElementById(index).submit()};
+				//each.onclick=function(){form.submit()};
+
+				let p = document.createElement("p");
+				p.textContent=users[index].user;
+
+				each.appendChild(p);
+				document.getElementById("list").appendChild(each);
 
 				google.maps.event.addDomListener(marker, 'click', function() {
 					
@@ -278,7 +368,7 @@
 	<p>EDIT AVATAR?</p>
 	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
 		<input type="file" name="avatar">
-		<button type="submit">edit</button>
+		<button type="submit">upload</button>
 	</form>
 	<br>
 
@@ -303,7 +393,7 @@
 	<br>
 
 </div>
-
+<!--
 <script type="text/javascript">
 	let dropdown = document.getElementById("friends");
 	let placeholder = document.createElement("option");
