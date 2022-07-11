@@ -1,6 +1,4 @@
-<!--BITMOJI CODE IN ADDMARKER
-	AAAAAMDLADNFJKWNDJKFGBNAKJDBGKJSFBGBDFKG
-	SDFSKBDGHJBSFHJBGJSHFBGHBSFGHJBJHSDFG-->
+
 
 <style>
 	a[href^="http://maps.google.com/maps"]{display:none !important}
@@ -29,43 +27,98 @@
 	#delprompt{
 		background:black;
 	}
-	nav ul{height:200px; width:300px;}
-	nav ul{overflow:hidden; overflow-y:scroll;}
+	nav {height:200px; width:300px;}
+	nav {overflow:hidden; overflow-y:scroll;}
 </style>
 
 <body>
+	<div class="header">
+	
+	<img style="margin-top:0;height:50px;padding-left:20px"src="assets/display.png">
 
-<p>UPLOAD?</p>
-<form action="http://localhost:8080/upload" method="POST" enctype="multipart/form-data">
-	<input type="file" name="post">
-	<input type="text" name="desc" maxlength="256">
-	<input type="submit">
+
+	<button class="onpurp upload" onclick="document.getElementById('fileu').click();closesettings();">+</button>
+
+<button id="set" class="onpurp settings"onclick="showsettings()">⚙</button>
+
+
+<div id="usersettings" style="display:none;">
+
+	<button id="close" class="close" onclick="closesettings()">x</button>
+
+	<p>EDIT AVATAR</p>
+	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
+		<input type="file" name="avatar">
+		<button type="submit">upload</button>
+	</form>
+	<br>
+
+
+	<p>DELETE USER</p>
+	<button id="delete" onclick="delprompt()">delete user</button>
+	<div id="delprompt" style="display:none;">
+		<form action="http://localhost:8080/delete-user" method="POST">
+			<button type="submit">delete</button>
+		</form>
+		<button id="cancel" onclick="canceldel()">cancel</button>
+	</div>
+	<br>
+
+
+
+
+	<p>LOGOUT</p>
+	<form action="http://localhost:8080/logout" method="POST">
+		<button type="submit">logout</button>
+	</form>
+	<br>
+
+</div>
+
+
+</div>
+
+
+
+<div class="prompt" id="upload" style="opacity:0;display:none;">
+
+<p>POST</p>
+<button class="close" onclick="closeupload()">x</button>
+<form action="http://localhost:8080/upload" id="fileform" method="POST" enctype="multipart/form-data">
+
+	<input type="file" name="post" style="display:none;"id="fileu" onchange="uploadinit(event)" accept="image/png,image/jpeg,image/*,/video/mp4,video/x-m4v,video/*">
+	<button class="sub" onclick="document.getElementById('fileform').submit()">submit</button>
 </form>
-<br>
+<textarea placeholder="Description" id="desc" cols="50" form="fileform" rows="3" name="desc" maxlength="256" required></textarea>
+</div>
+<div class="mapholder">
+<div class="map" id="map" style="width:40%; height:70%;"></div>
+<button id="center" class="center" onclick="map.setCenter(window.local);">⌖</button>
 
 
-<p>MAP</p>
-<p id="location"></p>
-<div id="map" style="width:50%; height:50%;"></div>
-<br><br>
 
-<button onclick="shownearby()">nearby users</button><button onclick="showfriends()">friends</button>
-<div id="selector">
+
+
+<div class="display">
+<button id="nb" onclick="shownearby()">nearby users</button><button id="sb" onclick="showfriends()">friends</button>
+
+
+
 <nav id="nearby">
-	<ul id ="list">
-	</ul>
+	
 </nav>
+
+
 <nav id="friends" style="display:none;">
-	<ul id ="friendlist">
-	</ul>
+	
 </nav>
 </div>
-<!--
+</div>
+
+
 <form id="form" action="http://localhost:8080/view" method="POST">
-	<select name="friend" id="friends">
-	</select>
-	<input type="submit">
-</form>-->
+
+</form>
 
 
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYF6pP4axgG1Orx-vwu-AuDty-yJFBC_U&callback=initmap"></script>
@@ -77,8 +130,95 @@
 	var friends=<%-JSON.stringify(friends)%>;
 
 
-	let tool = document.getElementById("location");
 	var map;
+
+	function closesettings(){
+		document.getElementById("usersettings").style.animation="fadeout .25s ease-in-out forwards";
+
+		setTimeout(function(){document.getElementById("usersettings").style.display="none";},250);
+
+	}
+	function showsettings(){
+		document.getElementById("usersettings").style.display="block";
+		document.getElementById("usersettings").style.animation="fadein .25s ease-in-out forwards";
+		closeupload();
+	}
+
+	function showupload(){
+
+		document.getElementById("upload").style.display="block";
+		document.getElementById("upload").style.animation="fadein .25s ease-in-out forwards";
+		closesettings();
+		
+	}
+	function uploadinit(event){
+
+
+		
+		let img = document.createElement("img")
+		img.src = URL.createObjectURL(event.target.files[0]);
+		img.id="curruploaded";
+		document.getElementById("upload").appendChild(img);
+
+		let image = document.getElementById("curruploaded");
+
+		image.onload = function(){
+		let width=image.width;
+		let height=image.height;
+
+		if (width>height){
+			var divis = 400/width;
+		}
+		else{
+			var divis = 400/height;
+		}
+
+		console.log(width*divis,width*divis,width*divis)
+
+		image.width = width*divis;
+		image.height = height*divis;
+		
+
+		showupload();
+	}
+	}
+
+	function closeupload(){
+	
+		document.getElementById("upload").style.animation="fadeout .25s ease-in-out forwards";
+
+		setTimeout(function(){document.getElementById("upload").style.display="none";document.getElementById("curruploaded").remove();},250);
+
+		document.getElementById("fileu").remove();
+
+		let asd = document.createElement("input");
+
+		asd.type="file";
+		asd.name="post";
+		asd.style="display:none";
+		asd.id="fileu"
+		asd.onchange=function(){uploadinit(event)};
+		asd.accept="image/png,image/jpeg,image/*,/video/mp4,video/x-m4v,video/*";
+
+		document.getElementById("fileform").appendChild(asd);
+		
+	}
+
+	function showlogin(){
+	
+		document.getElementById("signup").style.animation="fadeout .5s ease-in-out forwards";
+
+		setTimeout( function(){
+			document.getElementById("login").style.animation="fadein .5s ease-in-out forwards";
+		},500);
+
+		setTimeout ( function(){
+			document.getElementById("signup").style.display="none";
+			document.getElementById("login").style.display="block";
+		},1000);
+
+		
+	}
 
 	console.log(friends)
 	for (index in friends){
@@ -101,7 +241,7 @@
 		each.style.width="300px";
 		each.style.height="50px";
 		if (index%2==0){
-			each.style.background="grey";
+			each.style.background="#dfdfdf";
 		}
 		each.onclick=function(){document.getElementById(index).submit()};
 		//each.onclick=function(){form.submit()};
@@ -110,7 +250,7 @@
 		p.textContent=users[friends[index]].user;
 
 		each.appendChild(p);
-		document.getElementById("friendlist").appendChild(each);
+		document.getElementById("friends").appendChild(each);
 	}
 
 
@@ -125,11 +265,15 @@
 	function shownearby(){
 		document.getElementById("nearby").style.display="block";
 		document.getElementById("friends").style.display="none";
+		document.getElementById("nb").style.background="#bfbfbf";
+		document.getElementById("sb").style.background="#efefef";
 	}
 
 		function showfriends(){
 		document.getElementById("nearby").style.display="none";
 		document.getElementById("friends").style.display="block";
+		document.getElementById("sb").style.background="#bfbfbf";
+		document.getElementById("nb").style.background="#efefef";
 	}
 
 
@@ -175,7 +319,7 @@
 		})
 	}
 
-
+	window.count=0;
 	function addmarkers(nearby){
 		//let selector = document.getElementById("friends");
 		//let form = document.getElementById("form");
@@ -185,8 +329,8 @@
 		}} catch (err){console.log(err)}
 		window.markers=[]
 
-
-		document.getElementById("list").innerHTML="";
+		
+		document.getElementById("nearby").innerHTML="";
 
 		for (marker in nearby){
 			if (nearby[marker]){
@@ -209,6 +353,7 @@
 
 
 				let friend = document.createElement("input")
+				console.log(`VALUEVALUE ${index}`)
 				friend.value=index;
 				friend.name="friend";
 				friend.type="hidden";
@@ -223,8 +368,8 @@
 				if (index%2==0){
 					each.style.background="grey";
 				}
-				each.onclick=function(){document.getElementById(index).submit()};
-				//each.onclick=function(){form.submit()};
+				//each.onclick=function(){document.getElementById(index).submit()};
+				each.onclick=function(){form.submit()};
 
 				let p = document.createElement("p");
 				p.textContent=users[index].user;
@@ -234,7 +379,7 @@
 
 				google.maps.event.addDomListener(marker, 'click', function() {
 					
-					selector.remove();
+					//selector.remove();
 
 					let friend = document.createElement("input")
 					friend.value=index;
@@ -301,15 +446,20 @@
 		try{me.setMap(null);
 		me=null;} catch{console.log("oh well")}
 		console.log(pos)
-		tool.textContent=`lat: ${pos.coords.latitude} \n lon: ${pos.coords.longitude}`;
+		window.count++;
+		
 		let localpos = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+		window.local = localpos;
 
 
 
-		if (!window.down){
+		//if (!window.down){
+			//map.setCenter(localpos);
+			//console.log("moved")
+		//}
+		if (window.count == 1){
 			map.setCenter(localpos);
-			console.log("moved")
-		}
+		} 
 		me = new google.maps.Marker({
 			position:localpos,
 			map:map,
@@ -339,13 +489,6 @@
 	window.initmap = initmap;
 
 
-	function uset(){
-		document.getElementById("usersettings").style.display="block";
-		//document.getElementById("set").style.display="none";
-	} function unset(){
-		document.getElementById("usersettings").style.display="none";
-		//document.getElementById("set").style.display="block";
-	}
 
 
 	function delprompt(){
@@ -355,44 +498,9 @@
 	}
 
 </script>
-<br>
-
-<p>USER SETTINGS:</p>
-<button id="set"onclick="uset()">settings</button>
 
 
-<div id="usersettings" style="display:none;">
-
-	<button id="close" style="" onclick="unset()">x</button>
-
-	<p>EDIT AVATAR?</p>
-	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
-		<input type="file" name="avatar">
-		<button type="submit">upload</button>
-	</form>
-	<br>
-
-
-	<p>DEL USER?</p>
-	<button id="delete" onclick="delprompt()">delete user</button>
-	<div id="delprompt" style="display:none;">
-		<form action="http://localhost:8080/delete-user" method="POST">
-			<button type="submit">delete</button>
-		</form>
-		<button id="cancel" onclick="canceldel()">cancel</button>
-	</div>
-	<br>
-
-
-
-
-	<p>LOGOUT?</p>
-	<form action="http://localhost:8080/logout" method="POST">
-		<button type="submit">logout</button>
-	</form>
-	<br>
-
-</div>
+<link rel="stylesheet" href="assets/style.css" type="text/css">
 <!--
 <script type="text/javascript">
 	let dropdown = document.getElementById("friends");

@@ -21,6 +21,7 @@ app.use(session({
 app.set("view engine","ejs");
 app.use("/uploads", express.static('uploads'));
 app.use("/avatar", express.static('avatar'));
+app.use("/assets", express.static('assets'));
 app.use(bodyParser.json());
 
 
@@ -34,7 +35,7 @@ global.lldistance = distance*.0090210 //actual conversion rate is closer to .009
 
 app.get("/", (req, res) => {
 
-	res.render("login");
+	res.render("login",{er:null});
 
 })
 
@@ -62,17 +63,18 @@ app.post("/auth", (req, res) => {
 				}catch (err){ var data = {confirmed:[]}}
 
 
-				console.log(data.confirmed)
+				//console.log(data.confirmed)
 				res.render("home",{
 					users:users,
 					req:req,
-					friends:data.confirmed
+					friends:data.confirmed,
+					
 				});
 
 			}
 			else{
 				console.log(`\n[failed login attempt: <${users[i].user}> incorrect password]`);
-				res.send("try again");
+				res.render("login",{er:false});
 				break;
 			}
 
@@ -80,7 +82,7 @@ app.post("/auth", (req, res) => {
 	}
 	if (found!==true){
 		console.log(`\n[failed login attempt: <${req.body.user}> no such user exists]`);
-		res.send("user does not exist");
+		res.render("login",{er:true});
 	}
 
 });
@@ -123,9 +125,18 @@ app.post("/signup", (req, res) => {
 	if (!found){
 
 		let uid = adduser(req.body.user,req.body.pass);
-		res.send(`created new user ${req.body.user}`);
+		
 		console.log(`\n[user <${req.body.user}> just joined!]  `);
 
+		//console.log(uid)
+		req.session.loggedin = true;
+		req.session.uid = users[uid].uid;
+		console.log()
+
+
+		try{
+			var data = JSON.parse(fs.readFileSync(`friends/${req.session.uid}/friends.json`));
+		}catch (err){ var data = {confirmed:[]}}
 
 		fs.mkdirSync(`uploads/${uid}`, { recursive: true }, (err) => {
 			if (err) throw err;
@@ -133,10 +144,16 @@ app.post("/signup", (req, res) => {
 
 		fs.copyFileSync("default.jpeg",`uploads/${uid}/avatar.png`)
 
+		res.render("home",{
+					users:users,
+					req:req,
+					friends:data.confirmed
+				});
+
 
 	}
 	else{
-		res.send("user already exists");
+		res.render("login",{er:"e"});
 		console.log(`\n[user <${req.body.user}> already exists]  `);
 	}
 
@@ -153,7 +170,7 @@ app.post("/loc", (req,res)=>{
 	let nearby = [];
 
 	console.log(`\n[user] <${users[req.session.uid].user}>:: `);
-	console.log(req.body);
+	//console.log(req.body);
 	console.log();
 
 	let status=req.body.pos;
@@ -185,9 +202,6 @@ app.post("/loc", (req,res)=>{
 	}
 
 	res.send(nearby);
-	for (x in nearby){
-		console.log(x+"is nearby")
-	} 
 
 });
 
@@ -232,6 +246,7 @@ app.post("/upload", async (req,res) => {
 							highest=temp
 						}
 					}
+
 
 
 					let meta = JSON.stringify(imagemeta);
@@ -280,7 +295,11 @@ app.post("/delete-user" , async (req,res) => {
 app.post("/view", async (req,res) => {
 	friend = req.body.friend;
 	let images=[];
+	let metalist=[];
 	let parsedData=[];
+	if(Array.isArray(friend)){
+		friend=friend[0]
+	}
 	let dir = `./uploads/${friend}`;
 	fs.readdir(dir, (err,data) => {
 		//console.log(data);
@@ -292,14 +311,23 @@ app.post("/view", async (req,res) => {
 					images.push(data[x]);
 				}
 			} else {
-				meta = fs.readFileSync(`uploads/${friend}/${data[x]}`,{encoding:"utf8"});
-				parsedData.push(meta);
+				metalist.push(data[x]);
+			
 			}
 		}
 		//console.log(`images: ${images}`)
 		//console.log(`data: ${parsedData}`)
 
 		let uid=req.session.uid;
+
+		var collator = new Intl.Collator([], {numeric: true});
+		images.sort((a, b) => collator.compare(a, b));
+		metalist.sort((a, b) => collator.compare(a, b));
+
+		for (x in metalist){
+			meta = fs.readFileSync(`uploads/${friend}/${metalist[x]}`,{encoding:"utf8"});
+			parsedData.push(meta);
+		}
 
 		try{
 			var data = JSON.parse(fs.readFileSync(`friends/${uid}/friends.json`));
@@ -448,7 +476,7 @@ app.post("/avatar", async (req,res) => {
 	if (checklogin(req,res)){
 			if(!req.files) {
 				res.send("no image attached");
-				console.log("imsmsart")
+				
 			}
 			else{
 				try{
@@ -471,12 +499,12 @@ app.post("/avatar", async (req,res) => {
 				if (imgsize.width>imgsize.height){
 					global.mult = imgsize.width/40;
 					//console.log("constant is set")
-					console.log(mult);
+					//console.log(mult);
 				}
 				else{
 					global.mult = imgsize.height/40;
 					//console.log("constant is set")
-					console.log(mult);
+					//console.log(mult);
 				}	
 
 
@@ -488,7 +516,7 @@ app.post("/avatar", async (req,res) => {
 				
 				sharp(req.files.avatar.data).resize({ height: height, width: width }).toFile(`./uploads/${req.session.uid}/avatar.png`)
 				.then(function(newFileInfo) {
-					console.log("Success")
+					let celebration = "yay";
 				})
 				.catch(function(err) {
 					console.log(err);
