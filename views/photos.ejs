@@ -1,27 +1,20 @@
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="assets/style.css">
 
 
-<style>
-
-	#editmenu {
-		background-color:grey;
-		border-radius: 15px;
-		padding:15px;
-		z-index:999;
-		position:fixed;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-	}
-
-</style>
-
-
 <body>
-
+	<form style="display:none" id="hidform" action="http://localhost:8080/authhome" method="POST">
+	</form>
+	<div class="header" id="header"style="height:50px;position:fixed;">
+		<img class="hoover" style="margin-top:0;height:50px;padding-left:0px;"src="assets/logo.png" onclick="document.getElementById('hidform').submit()">
 	<p class="name" id="name"></p>
-	<p class="friends" id="friends">You and this user are not friends.</p>
+	<p class="friendsstatus" id="friends"></p>
+		<img class="pfp" id="img">
+
+
+	</div>
+	<p class="spacer">.</p>
+
 
 	<div class="imageholder" style="background-color:black;"></div>
 
@@ -29,12 +22,12 @@
 
 	<div class="editmenu" style="display:none" id="editmenu">
 		
-		<form id = "desc" action="http://localhost:8080/edit" method="POST">
-			desc: <input type="text" name="newdesc"><br>
- 			<button type="submit">change desc</button>
+		<form target="dummyframe" class="editform" style="background:transparent" id = "desc" action="http://localhost:8080/edit" method="POST">
+			EDIT DESCRIPTION <textarea maxlength=256 onchange="newcol()" class="descenter" rows=3 cols=40 style="resize:none"name="newdesc"></textarea>
+ 			<button  onclick = "location.reload()" class="edeet" id="edeet" type="submit">save</button>
 		</form>
-		<form id = "del" action="http://localhost:8080/delete-post" method="POST">
- 			<button type="submit">delete post</button>
+		<form target="dummyframe" id = "del" action="http://localhost:8080/delete-post" method="POST">
+ 			<button  onclick = "location.reload()"class="postd"type="submit">delete post</button>
 		</form>
 
 	</div>
@@ -57,21 +50,31 @@
 	let friendstatus=<%-JSON.stringify(friendstatus)%>;
 
 	if(friendstatus){
-		document.getElementById("friends").textContent="You and this user are friends";
+		document.getElementById("friends").textContent="(friends)";
 	}
 
 
 
 	document.getElementById("name").textContent=user;
 
-	let img=document.createElement("img");
+
+	function newcol(){
+		document.getElementById("edeet").classList.add("an")
+	}
+
+	let img=document.getElementById("img");
 	img.src=String(dir+"/avatar.png");
-	document.body.appendChild(img);
+
+	if (img.width>img.height){
+		img.width=100;
+	} else {
+		img.height=100;
+	}
 
 	if (uid==friend){
-
+		/*
 		let tip = document.createElement("p");
-		tip.textContent = "edit avatar:";
+		tip.textContent = "EDIT AVATAR";
 		document.body.appendChild(tip);
 
 		let edit = document.createElement("form");
@@ -91,31 +94,35 @@
 		edit.appendChild(submit);
 		document.body.appendChild(edit);
 		document.body.appendChild(document.createElement("br"));
+		*/
 	} else {
 
 
-		let tip = document.createElement("p");
-		tip.textContent = "friend?";
-		document.body.appendChild(tip);
 
 		let edit = document.createElement("form");
 		edit.action="http://localhost:8080/friend";
 		edit.method="POST"
 		edit.enctype="multipart/form-data";
+		edit.target="dummyframe";
+		edit.onclick=function(){location.reload()};
+
 
 		let input = document.createElement("input")
 		input.type = "hidden";
 		input.value=friend;
 		input.name = "friend";
+		
 
 		let submit = document.createElement("button")
 		submit.type="submit";
-		submit.textContent="add friend";
+		submit.textContent="+";
+		submit.classList.add("conflog");
+		submit.classList.add("frien");
+
 
 		edit.appendChild(input);
 		edit.appendChild(submit);
 		document.body.appendChild(edit);
-		document.body.appendChild(document.createElement("br"));
 
 	}
 
@@ -151,14 +158,35 @@
 	for (x in files){
 		
 		let img=document.createElement("img");
+		img.onload = function () {
+			if (image.width>image.height){
+				image.width=400;
+			} else {
+				image.height=400;
+			}
+		}
 		img.src=String(dir+"/"+files[x]);
+		img.id=x;
+		img.classList.add("post");
 		document.body.appendChild(img);
+
+		let image = document.getElementById(x);
+
+
+
+
+			var div = document.createElement("div");
+			div.classList.add("postholder");
 
 
 		//if (!((img.src).includes("avatar"))){
 			let desc=document.createElement("p");
 			desc.innerHTML=JSON.parse(meta[x]).likes.length+" likes<br>"  +  JSON.parse(meta[x]).desc;
-			document.body.appendChild(desc);
+
+			div.appendChild(img);
+			
+
+		
 
 
 			if (uid == friend){
@@ -167,8 +195,12 @@
 				edit.textContent="edit";
 				edit.id=files[x];
 				edit.onclick=function(){editpost(this.id)};
-				document.body.appendChild(edit);
-				edit=null
+				edit.classList.add("posttool")
+
+				//document.body.appendChild(edit);
+			
+				console.log(div)
+				div.appendChild(edit);
 
 			} else {
 
@@ -182,7 +214,10 @@
 
 					let sub=document.createElement("input");
 					sub.type="submit";
-					sub.value="like";
+
+					sub.value="♥";
+					sub.classList.add("conflog");
+					sub.classList.add("heart")
 					sub.onclick=function(){location.reload();};
 
 
@@ -201,13 +236,16 @@
 					like.appendChild(sub);
 					like.appendChild(post);
 					like.appendChild(friendid);
-					document.body.appendChild(like);
+					//document.body.appendChild(like);
+					div.appendChild(like);
 				
 				//like.textContent="like";
 				//like.id=files[x];
 				//like.onclick=function(){likepost(this.id)};
 				//document.body.appendChild(like);
 			}
+			div.appendChild(desc);
+			document.body.appendChild(div);
 
 			document.body.appendChild(document.createElement("br"));
 

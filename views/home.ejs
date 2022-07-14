@@ -1,5 +1,5 @@
 
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 	a[href^="http://maps.google.com/maps"]{display:none !important}
 	a[href^="https://maps.google.com/maps"]{display:none !important}
@@ -42,34 +42,34 @@
 <button id="set" class="onpurp settings"onclick="showsettings()">⚙</button>
 
 
-<div id="usersettings" style="display:none;">
+<div id="usersettings" class="usets" style="display:none;">
 
 	<button id="close" class="close" onclick="closesettings()">x</button>
 
 	<p>EDIT AVATAR</p>
+	<img class="avatar" id="avatarimg" width="300" style="border-radius:10px">
 	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
-		<input type="file" name="avatar">
-		<button type="submit">upload</button>
+		<input type="file" id="pimput" name="avatar" onchange="avatared(event)" style="display:none">
+		<button class="conflog avataru" id="tick" type="submit" style="display:none">✓</button>
 	</form>
-	<br>
+
+	<button class="conflog avatarc" onclick="document.getElementById('pimput').click()">+</button>
 
 
-	<p>DELETE USER</p>
-	<button id="delete" onclick="delprompt()">delete user</button>
-	<div id="delprompt" style="display:none;">
+
+	<button id="delete" class="util" onclick="delprompt()">delete user</button>
+	<div id="delprompt" style="display:none; height:100px">
+		<p>ARE YOU SURE YOU WANT TO DELETE?</p>
 		<form action="http://localhost:8080/delete-user" method="POST">
-			<button type="submit">delete</button>
+			<button class="util confirm" type="submit">delete user</button>
 		</form>
-		<button id="cancel" onclick="canceldel()">cancel</button>
+		<button class="util logout cancel" id="cancel" onclick="canceldel()">cancel</button>
 	</div>
-	<br>
 
 
 
-
-	<p>LOGOUT</p>
 	<form action="http://localhost:8080/logout" method="POST">
-		<button type="submit">logout</button>
+		<button class="util logout" type="submit">logout</button>
 	</form>
 	<br>
 
@@ -99,7 +99,7 @@
 
 
 
-<div class="display">
+<div id="display" class="display">
 <button id="nb" onclick="shownearby()">nearby users</button><button id="sb" onclick="showfriends()">friends</button>
 
 
@@ -132,16 +132,27 @@
 
 	var map;
 
+	function avatared(event){
+		document.getElementById("tick").style.display="block";
+
+		let img = document.getElementById("avatarimg");
+
+		img.src = URL.createObjectURL(event.target.files[0]);
+	}
+
 	function closesettings(){
 		document.getElementById("usersettings").style.animation="fadeout .25s ease-in-out forwards";
 
-		setTimeout(function(){document.getElementById("usersettings").style.display="none";},250);
+		setTimeout(function(){document.getElementById("usersettings").style.display="none";document.getElementById("tick").style.display="none";},250);
 
 	}
 	function showsettings(){
 		document.getElementById("usersettings").style.display="block";
 		document.getElementById("usersettings").style.animation="fadein .25s ease-in-out forwards";
 		closeupload();
+	
+		document.getElementById("avatarimg").src=`./uploads/${window.uid}/avatar.png`;
+
 	}
 
 	function showupload(){
@@ -243,8 +254,8 @@
 		if (index%2==0){
 			each.style.background="#dfdfdf";
 		}
-		each.onclick=function(){document.getElementById(index).submit()};
-		//each.onclick=function(){form.submit()};
+		//each.onclick=function(){document.getElementById(index).submit()};
+		each.onclick=function(){form.submit()};
 
 		let p = document.createElement("p");
 		p.textContent=users[friends[index]].user;
@@ -261,7 +272,7 @@
 	});
 
 
-
+	shownearby();
 	function shownearby(){
 		document.getElementById("nearby").style.display="block";
 		document.getElementById("friends").style.display="none";
@@ -331,17 +342,57 @@
 
 		
 		document.getElementById("nearby").innerHTML="";
+						//document.getElementById("3").remove();
+				const del = document.querySelectorAll('.dumpster');
+
+				del.forEach(item => {
+					item.remove();
+				});
 
 		for (marker in nearby){
 			if (nearby[marker]){
 				let index=marker;
+
+				//document.getElementById(index).remove();
+
+				let img = document.createElement("img");
+				img.src=`uploads/${index}/avatar.png`;
+				img.opacity=0;
+				img.id="remove"
+				document.body.appendChild(img);
+
+
+				if (img.width > img.height){
+					img.width=40;
+				}	else{
+					img.height=40;
+				}
+
+				//document.getElementById("remove").remove();
+			
+				//document.body.appendChild(img);
+
+
+
+
+				let width= document.getElementById("remove").width;
+				let height = document.getElementById("remove").height;
+				document.getElementById("remove").remove();
+
+				var icon = {
+					url:`uploads/${index}/avatar.png`,
+					scaledSize: new google.maps.Size(width, height),
+					optimized:false
+				}
+
 				marker = new google.maps.Marker({
 					position:{lat:-34,lng:150},//nearby[marker],
 					//nearby[marker] works fine, its just if youre testing with mutliple tabs
 					//in the same physical location, all the tabs stack on eachother
 					//so I set them to a distance away for testing
 					map:map,
-					icon:`uploads/${index}/avatar.png`
+					icon:icon,
+					scaledSize: new google.maps.Size(width, height)
 				})	
 				window.markers.push(marker);
 				
@@ -349,7 +400,7 @@
 				let form = document.createElement("form");
 				form.action="http://localhost:8080/view";
 				form.method="POST";
-				form.id=index;
+				form.classList.add("dumpster");
 
 
 				let friend = document.createElement("input")
@@ -359,6 +410,8 @@
 				friend.type="hidden";
 				form.appendChild(friend);
 
+
+
 				document.body.appendChild(form);
 
 
@@ -366,7 +419,7 @@
 				each.style.width="300px";
 				each.style.height="50px";
 				if (index%2==0){
-					each.style.background="grey";
+					each.style.background="rgb(223, 223, 223)";
 				}
 				//each.onclick=function(){document.getElementById(index).submit()};
 				each.onclick=function(){form.submit()};
@@ -375,7 +428,7 @@
 				p.textContent=users[index].user;
 
 				each.appendChild(p);
-				document.getElementById("list").appendChild(each);
+				document.getElementById("nearby").appendChild(each);
 
 				google.maps.event.addDomListener(marker, 'click', function() {
 					
@@ -460,10 +513,40 @@
 		if (window.count == 1){
 			map.setCenter(localpos);
 		} 
+			let img = document.createElement("img");
+				img.src=`uploads/${uid}/avatar.png`;
+				img.opacity=0;
+				img.id="remove"
+				document.body.appendChild(img);
+
+
+				if (img.width > img.height){
+					img.width=40;
+				}	else{
+					img.height=40;
+				}
+
+				//document.getElementById("remove").remove();
+			
+				//document.body.appendChild(img);
+
+
+
+
+				let width= document.getElementById("remove").width;
+				let height = document.getElementById("remove").height;
+				document.getElementById("remove").remove();
+
+		var icon = {
+			url:`uploads/${window.uid}/avatar.png`,
+			scaledSize: new google.maps.Size(width, height),
+			optimized:false
+		}
+
 		me = new google.maps.Marker({
 			position:localpos,
 			map:map,
-			icon:`uploads/${window.uid}/avatar.png`
+			icon:icon
 		})
 		google.maps.event.addDomListener(me, 'click', function() {
 					
@@ -472,6 +555,7 @@
 					let friend = document.createElement("input")
 					friend.value=uid;
 					friend.name="friend";
+					friend.type="hidden";
 
 					form.appendChild(friend);
 					form.submit();
@@ -495,6 +579,20 @@
 		document.getElementById("delprompt").style.display="block";
 	} function canceldel(){
 		document.getElementById("delprompt").style.display="none";
+	}
+
+	if( /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
+		let dis = document.getElementById("display").style;
+		dis.display="block";
+		dis.position="absolute";
+		dis.top="460px";
+
+		let map = document.getElementById("map").style;
+		map.width="80%";
+		map.height="50%";
+
+		let set = document.getElementById("usersettings").style;
+		set.width="100px";
 	}
 
 </script>

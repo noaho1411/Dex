@@ -43,7 +43,21 @@ app.get("/", (req, res) => {
 
 
 
+app.post("/authhome", (req,res) => {
+	try{
+		var data = JSON.parse(fs.readFileSync(`friends/${req.session.uid}/friends.json`));
+	}catch (err){ var data = {confirmed:[]}}
 
+
+	//console.log(data.confirmed)
+	res.render("home",{
+		users:users,
+		req:req,
+		friends:data.confirmed,
+		
+	});
+	
+})
 //login request
 
 app.post("/auth", (req, res) => {
@@ -170,7 +184,7 @@ app.post("/loc", (req,res)=>{
 	let nearby = [];
 
 	console.log(`\n[user] <${users[req.session.uid].user}>:: `);
-	//console.log(req.body);
+	console.log(req.body);
 	console.log();
 
 	let status=req.body.pos;
@@ -495,7 +509,7 @@ app.post("/avatar", async (req,res) => {
 
 				let imgsize = sizeOf(req.files.avatar.data);
 				//console.log(imgsize);
-
+				/*
 				if (imgsize.width>imgsize.height){
 					global.mult = imgsize.width/40;
 					//console.log("constant is set")
@@ -521,10 +535,10 @@ app.post("/avatar", async (req,res) => {
 				.catch(function(err) {
 					console.log(err);
 				});
+	*/
 
 
-
-				//req.files.avatar.mv(`./uploads/${req.session.uid}/avatar.png`);
+				req.files.avatar.mv(`./uploads/${req.session.uid}/avatar.png`);
 					
 				console.log(`\n[user <${users[req.session.uid].user}> just updated their avatar]`);
 
@@ -622,13 +636,16 @@ fs.readFile("users.json", (err, data) => {
 
 app.post("/edit", (req, res) => {
 
-	dir=`uploads/${req.session.uid}/${req.body.post.slice(0,-4)}.json`;
+	console.log(req.body.post)
+
+	dir=`uploads/${req.session.uid}/${path.parse(req.body.post).name}.json`;
 	console.log(`\nuser <${users[req.session.uid].user}> editing ${dir}`);
 	let temp = JSON.parse(fs.readFileSync(dir));
 	temp.desc=req.body.newdesc;
 	fs.writeFileSync(dir, JSON.stringify(temp));
 
-	res.send("updated desc");
+//LIKE TARGETS DUMMY FRAME, DUMMYFRAM ON EDIT AND DELETE IS TARGETTED, BUT RELOAD WONT GO THROUGH???
+//PLS FIX
 
 
 });
@@ -639,10 +656,10 @@ app.post("/edit", (req, res) => {
 
 app.post("/delete-post", (req, res) => {
 
-	dir=`uploads/${req.session.uid}/${req.body.post.slice(0,-4)}`;
-	fs.rmSync(`${dir}.png`);
+	dir=`uploads/${req.session.uid}/${path.parse(req.body.post).name}`;
+	fs.rmSync(`${dir}${path.extname(req.body.post)}`);
 	fs.rmSync(`${dir}.json`);
-	
+
 
 
 });

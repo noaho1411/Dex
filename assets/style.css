@@ -10,6 +10,7 @@ body {
 	background-color:#fbfbfb;
 
 }
+.spacer{margin-bottom:125px;}
 
 ::selection {
 	background:#79ffe1;
@@ -21,23 +22,72 @@ body {
 	width:100%;
 	margin:0;
 	padding:15px;
+	z-index: 9999;
 
 }
+.posttool{
+	background:transparent;
+	border:none;
+	color:#66a1ff;
+	cursor:pointer;
+	border-bottom:2px dotted #66a1ff;
+	font-size:15px;
+	position:absolute;
+	margin-left:400px;
+}
+.heart {
+	background:transparent;
+	border:none;
+	color:#66a1ff;
+	cursor:pointer;
+	border-bottom:2px dotted #66a1ff;
+	font-size:15px;
+	position:absolute;
+	margin-left:400px;
+}
+.postholder{
+	background:#e3e3e3;
+	padding:15px;
+	border-radius:25px;
+	width:450px;
+	
+	margin-left:50%;
+	transform:translateX(-50%);
+
+}	
+.friendsstatus{
+	position:absolute;
+	margin-left:0px;
+	top:40px;
+	color:white;
+	background-color:transparent!important;
+}
+img[src*="avatar.png"]{
+	border-radius:20px;
+  }
 .mapholder {
-	margin:50px auto;
-}
 
+	transform:translateX(15%);
+	margin-top:50px;
+}
+.frien{
+	z-index:999999;
+	position:fixed;
+	top:100px;
+	left:55%;
+
+}
 .map {
 	display:inline-block;
 }
 .center {
 	position:relative;
-	right:60px;
+	right:50px;
 	bottom:15px;
 	background:transparent;
 	border:none;
 	color:white;
-	font-size:54px;
+	font-size:40px;
 	cursor:pointer;
 	z-index: 999;
 	font-weight:900;
@@ -52,7 +102,7 @@ body {
 }
 
 .display{
-	display:inline-block;
+	display:inline;
 	position:absolute;
 	top:135px;
 	border:none;
@@ -115,8 +165,21 @@ body {
 	box-shadow: 0px 6px 15px rgba(106, 0, 255, 0.9);
 	transform:translateY(-5px);
 }
-
-#upload, #usersettings, #delprompt{
+.conflog:active {
+	transform:translateY(-5px);
+}
+.post{
+	display:block;
+	margin:20px auto;
+	border-radius:20px;
+}
+.pfp{
+	position:absolute;
+	left:48.5%;
+	transform:translateX(-50%);
+	box-shadow: 0 0 0 15px #6a00ff, 0 0 0 20px #fff inset;;
+}
+#upload, #usersettings, #delprompt, #editmenu{
 		position:fixed;
 		background:#e3e3e3;
 		border:1px solid grey;
@@ -127,8 +190,11 @@ body {
 		width:450px;
 
 		transform: translate(-50%, -50%);
-		z-index:999;
+		z-index:9999;
 
+}
+.editmenu{
+	height:200px;
 }
 
 #curruploaded {
@@ -137,7 +203,50 @@ body {
 	padding-bottom:125px;
 
 }
+.editform{
+	background:transparent;
+	position:absolute;
+	top:15px;
+}
+.edeet{
+	border:none;
+	border-radius:5px;
+	color:white;
+	height:25px;
+	padding:3px 10px;
+	letter-spacing: 1px;
+	font-size:17px;
+	cursor:pointer;
+	width:60px;
+	background:#b8b8b8;
+	letter-spacing:0px;
+	position:absolute;
+	margin-left:20px;
+	margin-top:27px;
+}
+.postd {
 
+	background:#ed0400;
+	border:none;
+	border-radius:5px;
+	color:white;
+	height:25px;
+	padding:3px 10px;
+	letter-spacing: 1px;
+	font-size:17px;
+	cursor:pointer;
+	width:125px;
+
+	display:block;
+	margin:150px auto;
+}
+.an{
+ background-color: #9447ff;
+ transition: all .25s ease-in-out;
+}
+.hoover:hover{
+	cursor:pointer;
+}
 #Desc {
 	margin-left:13px;
 	margin-bottom:10px;
@@ -162,6 +271,20 @@ body {
 
 }
 
+.avataru {
+	position:absolute;
+	left:240px;
+	margin-top:10px;
+}
+
+.avatarc {
+	position:absolute;
+	left:285px;
+	margin-top:-5px;
+	font-size:24px;
+	line-height:0px;
+
+}
 
 .close{
 	right:15px;
@@ -205,6 +328,10 @@ body {
 	box-shadow: 0px 8px 15px rgba(255, 255, 255, 0.7);
 	transform:translateY(-5px);
 }
+.onpurp:active {
+	transform:translateY(-1px);
+}
+
 
 .settings {
 	position:absolute;
@@ -223,9 +350,53 @@ body {
 	cursor:pointer;
 }
 
-
+.usets{
+	width:550px !important;
+}
+.util{
+	background:#ed0400;
+	border:none;
+	border-radius:5px;
+	color:white;
+	height:25px;
+	padding:3px 10px;
+	letter-spacing: 1px;
+	font-size:17px;
+	cursor:pointer;
+	position:absolute;
+	right:75px;
+	top:195px;
+	width:125px;
+}
+.logout {
+	top:155px;
+	background:#b8b8b8;
+	letter-spacing:0px;
+}
+.util:active{
+	transform:translateY(2px);
+}
+.confirm{
+	position: absolute;
+	display:inline;
+	top:80px;
+	left:100px;
+}
+.cancel {
+	position:absolute;
+	display:inline;
+	top:80px;
+	right:100px;
+}
 #map {
 	border-radius:20px;
+}
+.name{
+	position:absolute;
+	font-size:48px;
+	top:10px;
+	margin-top:0px;
+	color:white;
 }
 @keyframes fadeout{
 	from {opacity:100;}
