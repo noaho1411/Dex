@@ -48,7 +48,7 @@
 
 	<p>EDIT AVATAR</p>
 	<img class="avatar" id="avatarimg" width="300" style="border-radius:10px">
-	<form action="http://localhost:8080/avatar" method="POST" enctype="multipart/form-data">
+	<form action="/avatar" method="POST" enctype="multipart/form-data">
 		<input type="file" id="pimput" name="avatar" onchange="avatared(event)" style="display:none">
 		<button class="conflog avataru" id="tick" type="submit" style="display:none">✓</button>
 	</form>
@@ -60,7 +60,7 @@
 	<button id="delete" class="util" onclick="delprompt()">delete user</button>
 	<div id="delprompt" style="display:none; height:100px">
 		<p>ARE YOU SURE YOU WANT TO DELETE?</p>
-		<form action="http://localhost:8080/delete-user" method="POST">
+		<form action="/delete-user" method="POST">
 			<button class="util confirm" type="submit">delete user</button>
 		</form>
 		<button class="util logout cancel" id="cancel" onclick="canceldel()">cancel</button>
@@ -68,7 +68,7 @@
 
 
 
-	<form action="http://localhost:8080/logout" method="POST">
+	<form action="/logout" method="POST">
 		<button class="util logout" type="submit">logout</button>
 	</form>
 	<br>
@@ -84,7 +84,7 @@
 
 <p>POST</p>
 <button class="close" onclick="closeupload()">x</button>
-<form action="http://localhost:8080/upload" id="fileform" method="POST" enctype="multipart/form-data">
+<form action="/upload" id="fileform" method="POST" enctype="multipart/form-data">
 
 	<input type="file" name="post" style="display:none;"id="fileu" onchange="uploadinit(event)" accept="image/png,image/jpeg,image/*,/video/mp4,video/x-m4v,video/*">
 	<button class="sub" onclick="document.getElementById('fileform').submit()">submit</button>
@@ -116,7 +116,7 @@
 </div>
 
 
-<form id="form" action="http://localhost:8080/view" method="POST">
+<form id="form" action="/view" method="POST">
 
 </form>
 
@@ -234,7 +234,7 @@
 	console.log(friends)
 	for (index in friends){
 		let form = document.createElement("form");
-		form.action="http://localhost:8080/view";
+		form.action="/view";
 		form.method="POST";
 		form.id=index;
 
@@ -398,7 +398,7 @@
 				
 
 				let form = document.createElement("form");
-				form.action="http://localhost:8080/view";
+				form.action="/view";
 				form.method="POST";
 				form.classList.add("dumpster");
 

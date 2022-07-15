@@ -3,7 +3,7 @@
 
 
 <body>
-	<form style="display:none" id="hidform" action="http://localhost:8080/authhome" method="POST">
+	<form style="display:none" id="hidform" action="/authhome" method="POST">
 	</form>
 	<div class="header" id="header"style="height:50px;position:fixed;">
 		<img class="hoover" style="margin-top:0;height:50px;padding-left:0px;"src="assets/logo.png" onclick="document.getElementById('hidform').submit()">
@@ -22,11 +22,11 @@
 
 	<div class="editmenu" style="display:none" id="editmenu">
 		
-		<form target="dummyframe" class="editform" style="background:transparent" id = "desc" action="http://localhost:8080/edit" method="POST">
+		<form target="dummyframe" class="editform" style="background:transparent" id = "desc" action="/edit" method="POST">
 			EDIT DESCRIPTION <textarea maxlength=256 onchange="newcol()" class="descenter" rows=3 cols=40 style="resize:none"name="newdesc"></textarea>
  			<button  onclick = "location.reload()" class="edeet" id="edeet" type="submit">save</button>
 		</form>
-		<form target="dummyframe" id = "del" action="http://localhost:8080/delete-post" method="POST">
+		<form target="dummyframe" id = "del" action="/delete-post" method="POST">
  			<button  onclick = "location.reload()"class="postd"type="submit">delete post</button>
 		</form>
 
@@ -78,7 +78,7 @@
 		document.body.appendChild(tip);
 
 		let edit = document.createElement("form");
-		edit.action="http://localhost:8080/avatar";
+		edit.action="/avatar";
 		edit.method="POST"
 		edit.enctype="multipart/form-data";
 
@@ -100,7 +100,7 @@
 
 
 		let edit = document.createElement("form");
-		edit.action="http://localhost:8080/friend";
+		edit.action="/friend";
 		edit.method="POST"
 		edit.enctype="multipart/form-data";
 		edit.target="dummyframe";
@@ -206,7 +206,7 @@
 
 
 					let like=document.createElement("form");
-					like.action="http://localhost:8080/like";
+					like.action="/like";
 					like.method="POST";
 					like.enctype="multipart/form-data";
 					like.target="dummyframe"
